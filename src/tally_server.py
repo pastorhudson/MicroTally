@@ -52,10 +52,15 @@ async def handle_tally(camera, status):
 
 
 async def run_tallys():
+    print(CAMERA_CONFIG)
     while True:
         shots = get_wirecast_shots()
-        for shot_type, shot in shots.items():
-            print(shot_type, shot)
+        for shot_type, shots in shots.items():
+            for shot in shots:
+                if shot.lower() in CAMERA_CONFIG:
+                    print(shot.lower(), shot_type)
+                    await handle_tally(shot.lower(), shot_type)
+        # await asyncio.sleep(1)
 
     # Example usage
     # print(CAMERA_STATE)
@@ -65,4 +70,4 @@ async def run_tallys():
 
 # Run the main function
 loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+loop.run_until_complete(run_tallys())

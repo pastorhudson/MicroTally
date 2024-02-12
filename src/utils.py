@@ -107,8 +107,12 @@ def get_wirecast_shots():
         layer += 1
         live_cams.append(str(getName(LiveShotID(layer))))
         queued_cams.append(str(getName(PreviewShotID(layer))))
+        try:
+            queued_cams.remove(str(getName(LiveShotID(layer))))
+        except ValueError:
+            pass
 
-    return {'live_cams': live_cams, 'queued_cams': queued_cams}
+    return {'live': live_cams, 'queue': queued_cams}
 
 
 class CameraStateSingleton:
@@ -130,9 +134,9 @@ class CameraStateSingleton:
                 CAMERA_STATE[config[1].lower()] = 'off'
         return CAMERA_STATE
 
+
 def build_camera_state():
     return CameraStateSingleton.get_instance()
-
 
 
 def build_camera_config():
@@ -147,5 +151,7 @@ def build_camera_config():
 if __name__ == '__main__':
     # print(get_microtally_config())
     # print(get_wirecast_shots())
-    print(build_camera_state())
-    print(build_camera_config())
+    # print(build_camera_state())
+    # print(build_camera_config())
+    while True:
+        print(get_wirecast_shots())
