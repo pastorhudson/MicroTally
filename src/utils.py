@@ -3,6 +3,7 @@ import os
 import logging
 import colorlog
 from datetime import datetime
+from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
 
 
 def setup_logger(logger_name):
@@ -57,6 +58,8 @@ def check_config():
 
         # Populate the configparser object with your data
         config['microtallys'] = {
+            ';How many layers do you have in wirecast?': '',
+            'wirecast_layers': 2,
             ';Set the name and ip addresses of your microtallys': '',
             'left_cam': '192.168.1.183',
             'left_cam_wirecast_name': 'Left',
@@ -64,13 +67,6 @@ def check_config():
             'right_cam_wirecast_name': 'Right',
             'center_cam': '192.168.1.52',
             'center_cam_wirecast_name': 'Center',
-            # 'tally4': '192.168.0.x',
-            # 'tally5': '192.168.0.x',
-            # 'tally6': '192.168.0.x',
-            # 'tally7': '192.168.0.x',
-            # 'tally8': '192.168.0.x',
-            # 'tally9': '192.168.0.x',
-            # 'tally10': '192.168.0.x',
         }
 
         # Write the populated configparser object to config.ini file
@@ -102,5 +98,18 @@ def get_microtally_config():
     return tally_ip_dict
 
 
+def get_wirecast_shots():
+    CONFIG = get_microtally_config()
+    live_cams = []
+    queued_cams = []
+    for layer in range(int(CONFIG['wirecast_layers'])):
+        layer += 1
+        live_cams.append(str(getName(LiveShotID(layer))))
+        queued_cams.append(str(getName(PreviewShotID(layer))))
+
+    return {'live_cams': live_cams, 'queued_cams': queued_cams}
+
+
 if __name__ == '__main__':
     print(get_microtally_config())
+    print(get_wirecast_shots())

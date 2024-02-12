@@ -122,7 +122,7 @@ def ShotIDByShotName(shotName):
     #   2 = Case Insensitive
     #   3 = Case Insensitive Contains
     # Returns a Wirecast shot_id.
-    # Return 0 if no shot matches.    
+    # Return 0 if no shot matches.
     objDoc = DocumentByIndex(1)
     if objDoc:
         return objDoc.ShotIDByName(shotName)
@@ -320,6 +320,7 @@ def getActiveShotID(layerNum):
     objLayer = LayerByIndex(layerNum)
     if objLayer:
         return objLayer.ActiveShotID
+
 
 # =======================================================
 # Shot Interface
