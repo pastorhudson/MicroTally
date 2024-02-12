@@ -111,14 +111,28 @@ def get_wirecast_shots():
     return {'live_cams': live_cams, 'queued_cams': queued_cams}
 
 
+class CameraStateSingleton:
+    _instance = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = cls._build_camera_state()
+        return cls._instance
+
+    @staticmethod
+    def _build_camera_state():
+        print('building')
+        CONFIG = get_microtally_config()
+        CAMERA_STATE = {}
+        for config in CONFIG.items():
+            if 'wirecast_name' in config[0]:
+                CAMERA_STATE[config[1].lower()] = 'off'
+        return CAMERA_STATE
+
 def build_camera_state():
-    print('building')
-    CONFIG = get_microtally_config()
-    CAMERA_STATE = {}
-    for config in CONFIG.items():
-        if 'wirecast_name' in config[0]:
-            CAMERA_STATE[config[1].lower()] = 'off'
-    return CAMERA_STATE
+    return CameraStateSingleton.get_instance()
+
 
 
 def build_camera_config():
