@@ -33,6 +33,8 @@ async def handle_tally(camera, status):
                 tasks.append(change_cam(cam_name, 'off'))
                 CAMERA_STATE[cam_name] = 'off'
         tasks.append(change_cam(camera, 'queue'))  # Queue the specified camera
+        CAMERA_STATE[camera] = 'queue'
+
     elif status == 'live':
         # If setting a camera to live, set all others to off
         for cam_name in CAMERA_CONFIG.keys():
@@ -41,6 +43,7 @@ async def handle_tally(camera, status):
                 CAMERA_STATE[cam_name] = 'off'
 
         tasks.append(change_cam(camera, 'live'))  # Set the specified camera to live
+        CAMERA_STATE[camera] = 'live'
 
     elif status == 'off':
         # Just turn off the specified camera without affecting others
@@ -55,10 +58,12 @@ async def run_tallys():
     print(CAMERA_CONFIG)
     while True:
         shots = get_wirecast_shots()
+        print(CAMERA_STATE)
         for shot_type, shots in shots.items():
             for shot in shots:
-                if shot.lower() in CAMERA_CONFIG:
-                    print(shot.lower(), shot_type)
+
+                if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
+                    print(f"Updating: {shot.lower()} to {shot_type}")
                     await handle_tally(shot.lower(), shot_type)
         # await asyncio.sleep(1)
 
