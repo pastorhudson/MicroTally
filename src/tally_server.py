@@ -5,11 +5,7 @@ from utils import get_microtally_config
 CAMERA_CONFIG = get_microtally_config()
 # Assuming this dict to keep track of the current state of each camera
 # This is a simplified state management approach
-CAMERA_STATE = {
-    "left_cam": 'off',  # Initial state is off for all cameras
-    'right_cam': 'off',
-    'center_cam': 'off',
-}
+CAMERA_STATE = get_microtally_config()
 
 async def fetch(url):
     async with aiohttp.ClientSession() as session:

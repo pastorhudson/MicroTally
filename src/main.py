@@ -1,6 +1,5 @@
 import argparse
 from utils import setup_logger
-from pypco.exceptions import PCORequestException
 
 
 def main():
@@ -19,8 +18,6 @@ def main():
         print('Hello World')
     except KeyboardInterrupt:
         logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
-    except PCORequestException:
-        logger.error("Please Check your Planning Center API keys are correct in the config.ini")
 
 
 if __name__ == "__main__":
