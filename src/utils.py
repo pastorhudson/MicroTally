@@ -58,16 +58,19 @@ def check_config():
         # Populate the configparser object with your data
         config['microtallys'] = {
             ';Set the name and ip addresses of your microtallys': '',
-            'left_cam': '192.168.0.x',
-            'right_cam': '192.168.0.x',
-            'center_cam': '192.168.0.x',
-            'tally4': '192.168.0.x',
-            'tally5': '192.168.0.x',
-            'tally6': '192.168.0.x',
-            'tally7': '192.168.0.x',
-            'tally8': '192.168.0.x',
-            'tally9': '192.168.0.x',
-            'tally10': '192.168.0.x',
+            'left_cam': '192.168.1.183',
+            'left_cam_wirecast_name': 'Left',
+            'right_cam': '192.168.1.64',
+            'right_cam_wirecast_name': 'Right',
+            'center_cam': '192.168.1.52',
+            'center_cam_wirecast_name': 'Center',
+            # 'tally4': '192.168.0.x',
+            # 'tally5': '192.168.0.x',
+            # 'tally6': '192.168.0.x',
+            # 'tally7': '192.168.0.x',
+            # 'tally8': '192.168.0.x',
+            # 'tally9': '192.168.0.x',
+            # 'tally10': '192.168.0.x',
         }
 
         # Write the populated configparser object to config.ini file
