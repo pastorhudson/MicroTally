@@ -1,19 +1,17 @@
 import aiohttp
 import asyncio
-from utils import get_microtally_config
+from utils import build_camera_config, build_camera_state
 
-CAMERA_CONFIG = get_microtally_config()
+CAMERA_CONFIG = build_camera_config()
 # Assuming this dict to keep track of the current state of each camera
 # This is a simplified state management approach
-CAMERA_STATE = get_microtally_config()
+CAMERA_STATE = build_camera_state()
+
 
 async def fetch(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            # print(f"Status: {response.status}")
-            # print(f"Content-type: {response.headers['content-type']}")
             html = await response.text()
-            # print(f"Body: {html[:100]}...")  # print the first 100 characters of the body response
 
 
 async def change_cam(camera_name, cam_status):
@@ -49,7 +47,8 @@ async def handle_tally(camera, status):
 
 async def main():
     # Example usage
-    await handle_tally('left_cam', 'live')  # This will queue left_cam and turn off any other camera that might be in 'queue'
+    print(CAMERA_STATE)
+    await handle_tally('center', 'queue')  # This will queue left_cam and turn off any other camera that might be in 'queue'
     # await handle_tally('right_cam', 'live')  # This will set center_cam to 'live' and others to 'off'
 
 

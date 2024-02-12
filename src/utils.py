@@ -60,13 +60,14 @@ def check_config():
         config['microtallys'] = {
             ';How many layers do you have in wirecast?': '',
             'wirecast_layers': 2,
-            ';Set the name and ip addresses of your microtallys': '',
-            'left_cam': '192.168.1.183',
+            ';Set the name of the wirecast shots to track': '',
             'left_cam_wirecast_name': 'Left',
-            'right_cam': '192.168.1.64',
             'right_cam_wirecast_name': 'Right',
-            'center_cam': '192.168.1.52',
             'center_cam_wirecast_name': 'Center',
+            ';Set the ip addresses of the corresponding tallys. Be sure to name them exactly as they are in wirecast': '',
+            'Left': '192.168.1.183',
+            'Right': '192.168.1.64',
+            'Center': '192.168.1.52',
         }
 
         # Write the populated configparser object to config.ini file
@@ -110,6 +111,27 @@ def get_wirecast_shots():
     return {'live_cams': live_cams, 'queued_cams': queued_cams}
 
 
+def build_camera_state():
+    print('building')
+    CONFIG = get_microtally_config()
+    CAMERA_STATE = {}
+    for config in CONFIG.items():
+        if 'wirecast_name' in config[0]:
+            CAMERA_STATE[config[1].lower()] = 'off'
+    return CAMERA_STATE
+
+
+def build_camera_config():
+    CONFIG = get_microtally_config()
+    CAMERA_CONFIG = {}
+    for cam, state in build_camera_state().items():
+        CAMERA_CONFIG[cam.lower()] = CONFIG[cam.lower()]
+
+    return CAMERA_CONFIG
+
+
 if __name__ == '__main__':
-    print(get_microtally_config())
-    print(get_wirecast_shots())
+    # print(get_microtally_config())
+    # print(get_wirecast_shots())
+    print(build_camera_state())
+    print(build_camera_config())
