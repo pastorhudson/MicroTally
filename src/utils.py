@@ -1,6 +1,5 @@
 import configparser
 import os
-from pypco import PCO
 import logging
 import colorlog
 from datetime import datetime
@@ -49,25 +48,6 @@ def setup_logger(logger_name):
 logger = setup_logger(__name__)
 
 
-def get_pco():
-    """
-    Retrieve the PCO object.
-
-    This method reads the configuration file 'config.ini' and creates a PCO object with the specified application ID and secret.
-
-    :return: The PCO object.
-    """
-    check_config()
-
-    try:
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-    except Exception:
-        logger.error(Exception)
-
-    return PCO(config.get('app', 'application_id'), config.get('app', 'secret'))
-
-
 def check_config():
     # Check if the file does not exist
     if not os.path.isfile('config.ini'):
@@ -76,38 +56,48 @@ def check_config():
         config = configparser.ConfigParser()
 
         # Populate the configparser object with your data
-        config['app'] = {
-            ';Get your Planning Center application_id and secret at https://api.planningcenteronline.com/oauth/applications': '',
-            'application_id': 'pco_app_id',
-            'secret': 'pco_app_secret',
-            ';Default is localhost 127.0.0.1 this is for running the program on the same machine as ProPresenter': '',
-            'pro_presenter_ip': '127.0.0.1',
-            'pro_presenter_port': '50001',
+        config['microtallys'] = {
+            ';Set the name and ip addresses of your microtallys': '',
+            'left_cam': '192.168.0.x',
+            'right_cam': '192.168.0.x',
+            'center_cam': '192.168.0.x',
+            'tally4': '192.168.0.x',
+            'tally5': '192.168.0.x',
+            'tally6': '192.168.0.x',
+            'tally7': '192.168.0.x',
+            'tally8': '192.168.0.x',
+            'tally9': '192.168.0.x',
+            'tally10': '192.168.0.x',
         }
 
         # Write the populated configparser object to config.ini file
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
-        raise Exception("ProPresenter configuration not found.\n"
+        raise Exception("MicroTally configuration not found.\n"
                         "One has been created for you. Please edit the config.ini with your own settings.")
     # logger.info("Config File Found")
     return
 
 
-def get_propresenter_config():
+def get_microtally_config():
     """
-    Returns the IP address and port number of the ProPresenter application
+    Returns the IP addresses of the MicroTallys
     configured in the 'config.ini' file.
 
-    :return: The IP address and port number of the ProPresenter application.
+    :return: A dict of the IP addresses of the MicroTallys.
     """
     check_config()
-
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    return config.get('app', 'pro_presenter_ip'), config.get('app', 'pro_presenter_port')
+    tally_ip_dict = {}  # initialize an empty dict to store tally_name:ip_address pairs
+
+    for tally_name in config['microtallys']:
+        # assuming that each tally_name has an associated ip_address
+        ip_address = config['microtallys'][tally_name]
+        tally_ip_dict[tally_name] = ip_address
+    return tally_ip_dict
 
 
 if __name__ == '__main__':
-    print(check_config())
+    print(get_microtally_config())
