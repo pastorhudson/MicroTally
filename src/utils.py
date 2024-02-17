@@ -5,9 +5,12 @@ import colorlog
 from datetime import datetime
 from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
 
+should_continue = True
+
 
 class ConfigError(Exception):
     pass
+
 
 def setup_logger(logger_name, level=logging.INFO):
     # Create a logger

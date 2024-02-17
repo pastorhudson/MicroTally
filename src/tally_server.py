@@ -1,8 +1,9 @@
 import aiohttp
 import asyncio
-from utils import build_camera_config, build_camera_state, get_wirecast_shots, setup_logger
+from utils import build_camera_config, build_camera_state, get_wirecast_shots, setup_logger, should_continue
 import logging
 
+should_continue = True
 
 CAMERA_CONFIG = build_camera_config()
 # Assuming this dict to keep track of the current state of each camera
@@ -58,45 +59,40 @@ async def all_off():
         await handle_tally(cam, 'off')
 
 
-async def cleanup():
+async def cleanup(logger):
+    global should_continue
+    should_continue = False
+
     logger.info("Turning off Tallys. . .")
     await all_off()
     logger.info('Done')
 
 
-def signal_handler(loop, signal_received):
-    logger.info(f"Signal {signal_received}")
-    loop.create_task(cleanup())
-    loop.stop()
-
-
 async def run_tallys(logger):
+    global should_continue
     await all_off()
-    try:
-        while True:
-            shots = get_wirecast_shots()
-            for shot_type, shots in shots.items():
-                logger.debug(f"{shot_type}, {shots}")
-                logger.debug(CAMERA_STATE)
-                if shot_type == 'queue' and not shots:
-                    logger.debug('Nothing Queued!')
-                    for cam, cam_state in CAMERA_STATE.items():
-                        logger.debug(f"{cam}, {cam_state}")
-                        if cam_state == 'queue':
-                            await handle_tally(cam, "off")
+    while should_continue:
+        # logger.info(should_continue)
+        shots = get_wirecast_shots()
+        for shot_type, shots in shots.items():
+            # logger.debug(f"{shot_type}, {shots}")
+            # logger.debug(CAMERA_STATE)
+            if shot_type == 'queue' and not shots:
+                # logger.debug('Nothing Queued!')
+                for cam, cam_state in CAMERA_STATE.items():
+                    # logger.debug(f"{cam}, {cam_state}")
+                    if cam_state == 'queue':
+                        await handle_tally(cam, "off")
 
-                for shot in shots:
-                    if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
-                        logger.info(f"Updating: {shot.lower()} to {shot_type}")
-                        CAMERA_STATE[shot.lower()] = shot_type
-                        await handle_tally(shot.lower(), shot_type)
-                    else:
-                        logger.debug('skipping no updates')
-            await asyncio.sleep(.1)
-    except asyncio.CancelledError:
-        pass
-    finally:
-        await cleanup()
+            for shot in shots:
+                if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
+                    logger.info(f"Updating: {shot.lower()} to {shot_type}")
+                    CAMERA_STATE[shot.lower()] = shot_type
+                    await handle_tally(shot.lower(), shot_type)
+                else:
+                    logger.debug('skipping no updates')
+        await asyncio.sleep(.2)
+
 
 
     # Example usage

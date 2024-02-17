@@ -1,7 +1,5 @@
 import argparse
 import asyncio
-import signal
-from src.tally_server import signal_handler
 from utils import setup_logger, check_config, ConfigError
 import logging
 
@@ -10,7 +8,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--test", help="test option: return the string 'SUCCESS'", action='store_true')
     parser.add_argument("-l", "--loglevel", help="Set log level info(default) or debug")
-    # parser.add_argument("-p", "--plan_id", help="plan id")
 
     args = parser.parse_args()
 
@@ -25,24 +22,23 @@ def main():
     if args.test:
         logger.info("SUCCESS!")
         return
+
+    loop = asyncio.get_event_loop()
+
     try:
         logger.info("Checking Config")
         check_config()
         logger.info('Starting MicroTally')
-        from tally_server import run_tallys
-        loop = asyncio.get_event_loop()
-        loop.add_signal_handler(signal.SIGINT, lambda: asyncio.ensure_future(cleanup()))
+        from tally_server import run_tallys, cleanup
+        loop.run_until_complete(run_tallys(logger))
 
-        try:
-            loop.run_until_complete(run_tallys(logger))
-        finally:
-            loop.close()
-            logger.info("Program exited.")
+    except KeyboardInterrupt:
+        loop.run_until_complete(cleanup(logger))
+        loop.close()
+        logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
 
     except ConfigError as e:
         logger.error(e)
-    except KeyboardInterrupt:
-        logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
 
 
 if __name__ == "__main__":
