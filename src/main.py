@@ -31,13 +31,10 @@ def main():
         logger.info('Starting MicroTally')
         from tally_server import run_tallys
         loop = asyncio.get_event_loop()
-        for sig in ('SIGINT', 'SIGTERM'):
-            loop.add_signal_handler(getattr(signal, sig), signal_handler, loop, sig)
+        loop.add_signal_handler(signal.SIGINT, lambda: asyncio.ensure_future(cleanup()))
 
         try:
             loop.run_until_complete(run_tallys(logger))
-        except (KeyboardInterrupt, RuntimeError):
-            pass
         finally:
             loop.close()
             logger.info("Program exited.")
