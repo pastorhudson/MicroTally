@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CBC Tally</title>
+  <link rel="icon" href="data:,">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white transition-colors duration-500">
+
+  <h1 class="text-4xl font-bold mb-4">CBC Tally Light</h1>
+  <p class="text-xl mb-8">ADDRESS: <strong class="font-bold">[MAC]</strong></p>
+  <p class="text-xl mb-8">LED state: <strong class="font-bold">[LED State]</strong></p>
+
+  <div class="space-x-4 flex">
+    <a href="/?led=queue" class="px-6 py-3 text-lg font-semibold text-gray-900 bg-yellow-400 hover:bg-yellow-300 rounded transition-colors duration-300">QUEUE</a>
+    <a href="/?led=live" class="px-6 py-3 text-lg font-semibold text-gray-900 bg-red-400 hover:bg-red-300 rounded transition-colors duration-300">LIVE</a>
+    <a href="/?led=off" class="px-6 py-3 text-lg font-semibold text-gray-900 bg-blue-400 hover:bg-blue-300 rounded transition-colors duration-300">OFF</a>
+  </div>
+
+</body>
+</html>
