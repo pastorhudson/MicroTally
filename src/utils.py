@@ -6,10 +6,10 @@ from datetime import datetime
 from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
 
 
-def setup_logger(logger_name):
+def setup_logger(logger_name, level=logging.INFO):
     # Create a logger
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(level)
 
     # Create a color formatter for the console
     color_formatter = colorlog.ColoredFormatter(

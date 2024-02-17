@@ -1,7 +1,8 @@
 import aiohttp
 import asyncio
+from utils import build_camera_config, build_camera_state, get_wirecast_shots, setup_logger
+import logging
 
-from utils import build_camera_config, build_camera_state, get_wirecast_shots
 
 CAMERA_CONFIG = build_camera_config()
 # Assuming this dict to keep track of the current state of each camera
@@ -33,7 +34,6 @@ async def handle_tally(camera, status):
                 tasks.append(change_cam(cam_name, 'off'))
                 CAMERA_STATE[cam_name] = 'off'
         tasks.append(change_cam(camera, 'queue'))  # Queue the specified camera
-        CAMERA_STATE[camera] = 'queue'
 
     elif status == 'live':
         # If setting a camera to live, set all others to off
@@ -43,7 +43,6 @@ async def handle_tally(camera, status):
                 CAMERA_STATE[cam_name] = 'off'
 
         tasks.append(change_cam(camera, 'live'))  # Set the specified camera to live
-        CAMERA_STATE[camera] = 'live'
 
     elif status == 'off':
         # Just turn off the specified camera without affecting others
@@ -54,25 +53,43 @@ async def handle_tally(camera, status):
     await asyncio.gather(*tasks)
 
 
+async def all_off():
+    for cam in CAMERA_STATE:
+        await handle_tally(cam, 'off')
+
+
 async def run_tallys():
-    print(CAMERA_CONFIG)
+    await all_off()
     while True:
         shots = get_wirecast_shots()
-        print(CAMERA_STATE)
         for shot_type, shots in shots.items():
-            for shot in shots:
+            logger.debug(f"{shot_type}, {shots}")
+            logger.debug(CAMERA_STATE)
+            if shot_type == 'queue' and not shots:
+                logger.debug('Nothing Queued!')
+                for cam, cam_state in CAMERA_STATE.items():
+                    logger.debug(f"{cam}, {cam_state}")
+                    if cam_state == 'queue':
+                        await handle_tally(cam, "off")
 
+            for shot in shots:
                 if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
-                    print(f"Updating: {shot.lower()} to {shot_type}")
+                    logger.info(f"Updating: {shot.lower()} to {shot_type}")
+                    CAMERA_STATE[shot.lower()] = shot_type
                     await handle_tally(shot.lower(), shot_type)
-        # await asyncio.sleep(1)
+                else:
+                    logger.debug('skipping no updates')
+        # await asyncio.sleep(2)
 
     # Example usage
     # print(CAMERA_STATE)
-    # await handle_tally('left', 'queue')  # This will queue left_cam and turn off any other camera that might be in 'queue'
+    # await handle_tally('right', 'off')  # This will queue left_cam and turn off any other camera that might be in 'queue'
     # await handle_tally('right_cam', 'live')  # This will set center_cam to 'live' and others to 'off'
 
+if __name__ == "__main__":
 
-# Run the main function
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run_tallys())
+    logger = setup_logger('microtally', level=logging.INFO)
+
+    # Run the main function
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run_tallys())
