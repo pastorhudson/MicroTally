@@ -22,8 +22,7 @@ def main():
         logger = setup_logger('microtally')
 
     if args.test:
-        check_config()
-        print("SUCCESS")
+        logger.info("SUCCESS!")
         return
     try:
         logger.info("Checking Config")
