@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 
-from src.tally_server import run_tallys
+from tally_server import run_tallys
 from utils import setup_logger, check_config
 import logging
 
