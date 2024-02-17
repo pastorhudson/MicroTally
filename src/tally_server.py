@@ -58,7 +58,9 @@ async def all_off():
         await handle_tally(cam, 'off')
 
 
-async def run_tallys():
+async def run_tallys(logger):
+    # logger = setup_logger('microtally', level=logging.INFO)
+
     await all_off()
     while True:
         shots = get_wirecast_shots()
@@ -79,7 +81,7 @@ async def run_tallys():
                     await handle_tally(shot.lower(), shot_type)
                 else:
                     logger.debug('skipping no updates')
-        # await asyncio.sleep(2)
+        await asyncio.sleep(.1)
 
     # Example usage
     # print(CAMERA_STATE)
