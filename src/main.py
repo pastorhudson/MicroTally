@@ -1,6 +1,7 @@
 import argparse
 import asyncio
-
+import signal
+from src.tally_server import signal_handler
 from utils import setup_logger, check_config, ConfigError
 import logging
 
@@ -29,9 +30,18 @@ def main():
         check_config()
         logger.info('Starting MicroTally')
         from tally_server import run_tallys
-
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(run_tallys(logger))
+        for sig in ('SIGINT', 'SIGTERM'):
+            loop.add_signal_handler(getattr(signal, sig), signal_handler, loop, sig)
+
+        try:
+            loop.run_until_complete(run_tallys(logger))
+        except (KeyboardInterrupt, RuntimeError):
+            pass
+        finally:
+            loop.close()
+            logger.info("Program exited.")
+
     except ConfigError as e:
         logger.error(e)
     except KeyboardInterrupt:

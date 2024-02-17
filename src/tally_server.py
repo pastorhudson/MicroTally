@@ -58,30 +58,46 @@ async def all_off():
         await handle_tally(cam, 'off')
 
 
-async def run_tallys(logger):
-    # logger = setup_logger('microtally', level=logging.INFO)
-
+async def cleanup():
+    logger.info("Turning off Tallys. . .")
     await all_off()
-    while True:
-        shots = get_wirecast_shots()
-        for shot_type, shots in shots.items():
-            logger.debug(f"{shot_type}, {shots}")
-            logger.debug(CAMERA_STATE)
-            if shot_type == 'queue' and not shots:
-                logger.debug('Nothing Queued!')
-                for cam, cam_state in CAMERA_STATE.items():
-                    logger.debug(f"{cam}, {cam_state}")
-                    if cam_state == 'queue':
-                        await handle_tally(cam, "off")
+    logger.info('Done')
 
-            for shot in shots:
-                if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
-                    logger.info(f"Updating: {shot.lower()} to {shot_type}")
-                    CAMERA_STATE[shot.lower()] = shot_type
-                    await handle_tally(shot.lower(), shot_type)
-                else:
-                    logger.debug('skipping no updates')
-        await asyncio.sleep(.1)
+
+def signal_handler(loop, signal_received):
+    logger.info(f"Signal {signal_received}")
+    loop.create_task(cleanup())
+    loop.stop()
+
+
+async def run_tallys(logger):
+    await all_off()
+    try:
+        while True:
+            shots = get_wirecast_shots()
+            for shot_type, shots in shots.items():
+                logger.debug(f"{shot_type}, {shots}")
+                logger.debug(CAMERA_STATE)
+                if shot_type == 'queue' and not shots:
+                    logger.debug('Nothing Queued!')
+                    for cam, cam_state in CAMERA_STATE.items():
+                        logger.debug(f"{cam}, {cam_state}")
+                        if cam_state == 'queue':
+                            await handle_tally(cam, "off")
+
+                for shot in shots:
+                    if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
+                        logger.info(f"Updating: {shot.lower()} to {shot_type}")
+                        CAMERA_STATE[shot.lower()] = shot_type
+                        await handle_tally(shot.lower(), shot_type)
+                    else:
+                        logger.debug('skipping no updates')
+            await asyncio.sleep(.1)
+    except asyncio.CancelledError:
+        pass
+    finally:
+        await cleanup()
+
 
     # Example usage
     # print(CAMERA_STATE)
@@ -89,9 +105,12 @@ async def run_tallys(logger):
     # await handle_tally('right_cam', 'live')  # This will set center_cam to 'live' and others to 'off'
 
 if __name__ == "__main__":
-
     logger = setup_logger('microtally', level=logging.INFO)
-
-    # Run the main function
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_tallys())
+
+    try:
+        loop.run_until_complete(run_tallys(logger))
+    except KeyboardInterrupt:
+        loop.run_until_complete(all_off())
+        loop.close()
+

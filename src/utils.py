@@ -54,7 +54,7 @@ logger = setup_logger(__name__)
 
 def check_config():
     # Check if the file does not exist
-    if not os.path.isfile('../config.ini'):
+    if not os.path.isfile('./config.ini'):
 
         # Create a configparser object
         config = configparser.ConfigParser()
