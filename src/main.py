@@ -1,8 +1,7 @@
 import argparse
 import asyncio
 
-from tally_server import run_tallys
-from utils import setup_logger, check_config
+from utils import setup_logger, check_config, ConfigError
 import logging
 
 
@@ -27,9 +26,15 @@ def main():
         print("SUCCESS")
         return
     try:
+        logger.info("Checking Config")
+        check_config()
         logger.info('Starting MicroTally')
+        from tally_server import run_tallys
+
         loop = asyncio.get_event_loop()
         loop.run_until_complete(run_tallys(logger))
+    except ConfigError as e:
+        logger.info(e)
     except KeyboardInterrupt:
         logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
 

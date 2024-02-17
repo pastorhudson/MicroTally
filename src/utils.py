@@ -6,6 +6,9 @@ from datetime import datetime
 from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
 
 
+class ConfigError(Exception):
+    pass
+
 def setup_logger(logger_name, level=logging.INFO):
     # Create a logger
     logger = logging.getLogger(logger_name)
@@ -51,7 +54,7 @@ logger = setup_logger(__name__)
 
 def check_config():
     # Check if the file does not exist
-    if not os.path.isfile('config.ini'):
+    if not os.path.isfile('../config.ini'):
 
         # Create a configparser object
         config = configparser.ConfigParser()
@@ -71,9 +74,9 @@ def check_config():
         }
 
         # Write the populated configparser object to config.ini file
-        with open('config.ini', 'w') as configfile:
+        with open('../config.ini', 'w') as configfile:
             config.write(configfile)
-        raise Exception("MicroTally configuration not found.\n"
+        raise ConfigError("MicroTally configuration not found.\n"
                         "One has been created for you. Please edit the config.ini with your own settings.")
     # logger.info("Config File Found")
     return
