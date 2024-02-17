@@ -132,7 +132,7 @@ class CameraStateSingleton:
 
     @staticmethod
     def _build_camera_state():
-        print('building')
+        logger.info('Building Camera State from config')
         CONFIG = get_microtally_config()
         CAMERA_STATE = {}
         for config in CONFIG.items():

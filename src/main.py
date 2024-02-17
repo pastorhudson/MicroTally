@@ -1,7 +1,11 @@
 import argparse
 import asyncio
-from utils import setup_logger, check_config, ConfigError
+
+from tally_server import cleanup
+from utils import setup_logger, check_config, ConfigError, should_continue
 import logging
+import win32api
+import win32con
 
 
 def main():
@@ -23,7 +27,7 @@ def main():
         logger.info("SUCCESS!")
         return
 
-    loop = asyncio.get_event_loop()
+    global loop
 
     try:
         logger.info("Checking Config")
@@ -33,13 +37,31 @@ def main():
         loop.run_until_complete(run_tallys(logger))
 
     except KeyboardInterrupt:
-        loop.run_until_complete(cleanup(logger))
-        loop.close()
+
         logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
 
     except ConfigError as e:
         logger.error(e)
 
 
+def console_ctrl_handler(ctrl_type):
+    global should_continue
+    global loop
+
+    if ctrl_type in [win32con.CTRL_C_EVENT, win32con.CTRL_BREAK_EVENT, win32con.CTRL_CLOSE_EVENT]:
+        print("Stopping loop...")
+        # Ensure cleanup() is called to create a coroutine object
+        coroutine = cleanup()  # Assuming cleanup is a coroutine function and doesn't require arguments
+        # Now pass the coroutine object to run_coroutine_threadsafe
+        asyncio.run_coroutine_threadsafe(coroutine, loop)
+        return True  # Indicate that the handler handled the event
+    return False  # Event was not handled
+
+
+win32api.SetConsoleCtrlHandler(console_ctrl_handler, True)
+
 if __name__ == "__main__":
+    global loop
+    loop = asyncio.get_event_loop()
+
     main()

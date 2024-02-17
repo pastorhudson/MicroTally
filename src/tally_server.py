@@ -59,13 +59,14 @@ async def all_off():
         await handle_tally(cam, 'off')
 
 
-async def cleanup(logger):
+async def cleanup():
     global should_continue
     should_continue = False
 
-    logger.info("Turning off Tallys. . .")
+    print("Turning off Tallys. . .")
     await all_off()
-    logger.info('Done')
+
+    print('Done')
 
 
 async def run_tallys(logger):
@@ -92,7 +93,7 @@ async def run_tallys(logger):
                 else:
                     logger.debug('skipping no updates')
         await asyncio.sleep(.2)
-
+    await all_off()
 
 
     # Example usage
