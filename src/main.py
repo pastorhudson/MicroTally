@@ -33,7 +33,7 @@ def main():
         loop = asyncio.get_event_loop()
         loop.run_until_complete(run_tallys(logger))
     except ConfigError as e:
-        logger.info(e)
+        logger.error(e)
     except KeyboardInterrupt:
         logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
 
