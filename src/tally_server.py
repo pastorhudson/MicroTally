@@ -92,7 +92,7 @@ async def run_tallys(logger):
                     await handle_tally(shot.lower(), shot_type)
                 else:
                     logger.debug('skipping no updates')
-        await asyncio.sleep(.2)
+        await asyncio.sleep(.5)
     await all_off()
 
 

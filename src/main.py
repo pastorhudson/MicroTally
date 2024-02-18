@@ -1,67 +1,118 @@
-import argparse
+import sys
 import asyncio
 
-from tally_server import cleanup
-from utils import setup_logger, check_config, ConfigError, should_continue
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtCore import QThreadPool, QRunnable
+import argparse
+import asyncio
+from tally_server import cleanup, CAMERA_STATE, handle_tally, CAMERA_CONFIG, all_off
+from utils import setup_logger, check_config, ConfigError, should_continue, get_wirecast_shots
 import logging
 import win32api
 import win32con
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--test", help="test option: return the string 'SUCCESS'", action='store_true')
-    parser.add_argument("-l", "--loglevel", help="Set log level info(default) or debug")
+class AsyncWorker(QRunnable):
+    def __init__(self, coroutine, callback=None):
+        super().__init__()
+        self.coroutine = coroutine
+        self.callback = callback
 
-    args = parser.parse_args()
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        task = loop.create_task(self.coroutine)
+        loop.run_until_complete(task)
+        loop.close()
+        # Execute callback after completion if provided
+        if self.callback:
+            self.callback()
 
-    if args.loglevel:
-        if args.loglevel == 'debug':
-            logger = setup_logger('microtally', logging.DEBUG)
-        if args.loglevel == 'info':
-            logger = setup_logger('microtally', logging.INFO)
-    else:
-        logger = setup_logger('microtally')
 
-    if args.test:
-        logger.info("SUCCESS!")
-        return
-
-    global loop
+async def async_task(stop_event):
+    logger = setup_logger('microtally')
 
     try:
         logger.info("Checking Config")
         check_config()
         logger.info('Starting MicroTally')
-        from tally_server import run_tallys, cleanup
-        loop.run_until_complete(run_tallys(logger))
+        while not stop_event.is_set():
+            shots = get_wirecast_shots()
+            for shot_type, shots in shots.items():
+                # logger.debug(f"{shot_type}, {shots}")
+                # logger.debug(CAMERA_STATE)
+                if shot_type == 'queue' and not shots:
+                    # logger.debug('Nothing Queued!')
+                    for cam, cam_state in CAMERA_STATE.items():
+                        # logger.debug(f"{cam}, {cam_state}")
+                        if cam_state == 'queue':
+                            await handle_tally(cam, "off")
 
-    except KeyboardInterrupt:
-
-        logger.info("Thanks for using this recipe. Check out more recipes at https://pcochef.com")
-
-    except ConfigError as e:
-        logger.error(e)
-
-
-def console_ctrl_handler(ctrl_type):
-    global should_continue
-    global loop
-
-    if ctrl_type in [win32con.CTRL_C_EVENT, win32con.CTRL_BREAK_EVENT, win32con.CTRL_CLOSE_EVENT]:
-        print("Stopping loop...")
-        # Ensure cleanup() is called to create a coroutine object
-        coroutine = cleanup()  # Assuming cleanup is a coroutine function and doesn't require arguments
-        # Now pass the coroutine object to run_coroutine_threadsafe
-        asyncio.run_coroutine_threadsafe(coroutine, loop)
-        return True  # Indicate that the handler handled the event
-    return False  # Event was not handled
+                for shot in shots:
+                    if shot.lower() in CAMERA_CONFIG and CAMERA_STATE[shot.lower()] != shot_type:
+                        logger.info(f"Updating: {shot.lower()} to {shot_type}")
+                        CAMERA_STATE[shot.lower()] = shot_type
+                        await handle_tally(shot.lower(), shot_type)
+                    else:
+                        logger.debug('skipping no updates')
+            await asyncio.sleep(.5)
+        await all_off()
+        # while not stop_event.is_set():
+        #     print("Doing something...")
+        #     await asyncio.sleep(1)  # Simulate async work
+    except asyncio.CancelledError:
+        print("Task was cancelled!")
 
 
-win32api.SetConsoleCtrlHandler(console_ctrl_handler, True)
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.threadpool = QThreadPool()
 
-if __name__ == "__main__":
-    global loop
-    loop = asyncio.get_event_loop()
+        # Stop event
+        self.stop_event = asyncio.Event()
 
-    main()
+        # Layout and buttons
+        self.setWindowTitle("MicroTally")
+        self.setMinimumSize(400, 200)
+        self.setWindowIcon(QIcon('./images/MicroTally.ico'))
+        layout = QVBoxLayout()
+        self.start_button = QPushButton("Start Tallys")
+        self.stop_button = QPushButton("Stop Tallys")
+        self.start_button.setStyleSheet("QPushButton {font-size:36; }")
+        self.stop_button.setStyleSheet("QPushButton {font-size:36; }")
+
+        self.stop_button.setEnabled(False)  # Disabled by default
+
+        layout.addWidget(self.start_button)
+        layout.addWidget(self.stop_button)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+        # Connect buttons
+        self.start_button.clicked.connect(self.start_async_task)
+        self.stop_button.clicked.connect(self.stop_async_task)
+
+    def start_async_task(self):
+        self.start_button.setEnabled(False)
+        self.stop_button.setEnabled(True)
+        worker = AsyncWorker(async_task(self.stop_event), self.on_task_complete)
+        self.threadpool.start(worker)
+
+    def stop_async_task(self):
+        self.stop_event.set()  # Signal the task to stop
+
+    def on_task_complete(self):
+        # Reset UI and stop event for next task
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(False)
+        self.stop_event.clear()
+
+
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+sys.exit(app.exec())
