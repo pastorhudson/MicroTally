@@ -41,7 +41,7 @@ jobs:
 
       - name: Build with PyInstaller for Windows and Linux
         if: matrix.os != 'macos-latest'
-        run: pyinstaller --onefile --windowed --icon ./images/MicroTally.ico --add-data ".\images;images" main.py
+        run: pyinstaller --onefile --windowed --icon ./images/MicroTally.ico --add-data ".\images;images" ./src/main.py
 
       - name: Test Windows Executable
         if: matrix.os == 'windows-latest'
