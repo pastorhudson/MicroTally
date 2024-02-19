@@ -5,7 +5,9 @@ import sys
 
 import colorlog
 from datetime import datetime
-from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
+
+if sys.platform.startswith('win'):
+    from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
 
 should_continue = True
 
@@ -166,6 +168,4 @@ if __name__ == '__main__':
     # print(get_microtally_config())
     # print(get_wirecast_shots())
     # print(build_camera_state())
-    # print(build_camera_config())
-    while True:
-        print(get_wirecast_shots())
+    print(build_camera_config())

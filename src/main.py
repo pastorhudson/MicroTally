@@ -7,7 +7,12 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayou
 from PySide6.QtCore import QThreadPool, QRunnable
 import asyncio
 from tally_server import CAMERA_STATE, handle_tally, CAMERA_CONFIG, all_off
-from utils import setup_logger, check_config, get_wirecast_shots, resource_path
+from utils import setup_logger, check_config, resource_path
+
+if sys.platform.startswith('win'):
+    from utils import get_wirecast_shots
+elif sys.platform.startswith('darwin'):
+    from mac_wirecast import get_mac_wirecast_shots
 
 
 class AsyncWorker(QRunnable):
@@ -37,7 +42,10 @@ async def async_task(stop_event):
         check_config()
         logger.info('Starting MicroTally')
         while not stop_event.is_set():
-            shots = get_wirecast_shots()
+            if sys.platform.startswith('win'):
+                shots = get_wirecast_shots()
+            elif sys.platform.startswith('darwin'):
+                shots = get_mac_wirecast_shots()
             for shot_type, shots in shots.items():
                 # logger.debug(f"{shot_type}, {shots}")
                 # logger.debug(CAMERA_STATE)

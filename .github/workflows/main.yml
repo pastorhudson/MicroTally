@@ -16,8 +16,8 @@ jobs:
 #            python-version: '3.8'
           - os: windows-latest
             python-version: '3.12'
-#          - os: macos-latest
-#            python-version: '3.12'
+          - os: macos-latest
+            python-version: '3.12'
 
     steps:
       - uses: actions/checkout@v2
@@ -31,17 +31,19 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r ./src/requirements.txt
           pip install pyinstaller
 
       - name: Build with PyInstaller for macOS
         if: matrix.os == 'macos-latest'
         run: |
-          pyinstaller --onefile ./src/main.py
+          pip install -r ./src/mac_requirements.txt
+          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data ".\src\images;images" ./src/main.py
 
       - name: Build with PyInstaller for Windows and Linux
         if: matrix.os != 'macos-latest'
-        run: pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data ".\src\images;images" .\src\main.py
+        run: |
+          pip install -r ./src/requirements.txt
+          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data ".\src\images;images" .\src\main.py
 
       - name: Test Windows Executable
         if: matrix.os == 'windows-latest'

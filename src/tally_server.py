@@ -3,7 +3,7 @@ import asyncio
 from utils import build_camera_config, build_camera_state, get_wirecast_shots, setup_logger, should_continue
 import logging
 
-should_continue = True
+# should_continue = True
 
 CAMERA_CONFIG = build_camera_config()
 # Assuming this dict to keep track of the current state of each camera
@@ -59,14 +59,14 @@ async def all_off():
         await handle_tally(cam, 'off')
 
 
-async def cleanup():
-    global should_continue
-    should_continue = False
-
-    print("Turning off Tallys. . .")
-    await all_off()
-
-    print('Done')
+# async def cleanup():
+#     global should_continue
+#     should_continue = False
+#
+#     print("Turning off Tallys. . .")
+#     await all_off()
+#
+#     print('Done')
 
 
 async def run_tallys(logger):
