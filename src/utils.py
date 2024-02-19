@@ -1,6 +1,8 @@
 import configparser
 import os
 import logging
+import sys
+
 import colorlog
 from datetime import datetime
 from wirecastCOMAPI import PreviewShotID, LiveShotID, getName
@@ -77,10 +79,10 @@ def check_config():
         }
 
         # Write the populated configparser object to config.ini file
-        with open('../config.ini', 'w') as configfile:
+        with open('./config.ini', 'w') as configfile:
             config.write(configfile)
-        raise ConfigError("MicroTally configuration not found.\n"
-                        "One has been created for you. Please edit the config.ini with your own settings.")
+        # raise ConfigError("MicroTally configuration not found.\n"
+        #                 "One has been created for you. Please edit the config.ini with your own settings.")
     # logger.info("Config File Found")
     return
 
@@ -152,6 +154,12 @@ def build_camera_config():
         CAMERA_CONFIG[cam.lower()] = CONFIG[cam.lower()]
 
     return CAMERA_CONFIG
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 
 if __name__ == '__main__':

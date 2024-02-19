@@ -1,21 +1,20 @@
 import sys
-import asyncio
-
+from configparser import ConfigParser
+from editconfig import ConfigEditor
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QSpacerItem, \
+    QSizePolicy
 from PySide6.QtCore import QThreadPool, QRunnable
-import argparse
 import asyncio
-from tally_server import cleanup, CAMERA_STATE, handle_tally, CAMERA_CONFIG, all_off
-from utils import setup_logger, check_config, ConfigError, should_continue, get_wirecast_shots
-import logging
-import win32api
-import win32con
+from tally_server import CAMERA_STATE, handle_tally, CAMERA_CONFIG, all_off
+from utils import setup_logger, check_config, get_wirecast_shots, resource_path
 
 
 class AsyncWorker(QRunnable):
     def __init__(self, coroutine, callback=None):
         super().__init__()
+        self.config = ConfigParser()
+        self.config.read('config.ini')
         self.coroutine = coroutine
         self.callback = callback
 
@@ -69,32 +68,56 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.threadpool = QThreadPool()
-
+        check_config()
         # Stop event
         self.stop_event = asyncio.Event()
 
-        # Layout and buttons
+        # Main window setup
         self.setWindowTitle("MicroTally")
         self.setMinimumSize(400, 200)
-        self.setWindowIcon(QIcon('./images/MicroTally.ico'))
+        self.setWindowIcon(QIcon(resource_path('images/MicroTally.ico')))
+
+        # Main layout
         layout = QVBoxLayout()
+
+        # Top row layout for gear button
+        topRowLayout = QHBoxLayout()
+        gearButton = QPushButton()
+        gearButton.setIcon(QIcon(resource_path('images/settings.png')))  # Make sure to adjust the path to your actual gear icon
+
+        gearButton.setFixedSize(40, 40)
+        gearButton.clicked.connect(self.open_config_editor)
+
+        # Add spacer and gear button to the top row layout
+        topRowLayout.addItem(QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        topRowLayout.addWidget(gearButton)
+
+        # Add the top row layout to the main layout
+        layout.addLayout(topRowLayout)
+
+        # Configure and add the start and stop buttons
         self.start_button = QPushButton("Start Tallys")
         self.stop_button = QPushButton("Stop Tallys")
         self.start_button.setStyleSheet("QPushButton {font-size:36; }")
         self.stop_button.setStyleSheet("QPushButton {font-size:36; }")
-
         self.stop_button.setEnabled(False)  # Disabled by default
 
         layout.addWidget(self.start_button)
         layout.addWidget(self.stop_button)
 
+        # Set the main layout
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        # Connect buttons
+        # Connect buttons to their functions
         self.start_button.clicked.connect(self.start_async_task)
         self.stop_button.clicked.connect(self.stop_async_task)
+
+    def open_config_editor(self):
+        self.editor = ConfigEditor()
+        self.editor.show()
+
 
     def start_async_task(self):
         self.start_button.setEnabled(False)
