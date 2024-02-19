@@ -12,3 +12,7 @@ All notable changes to this project will be documented in this file.
 ## v0.0.3
 ### Changes
  - Slightly better handling of program exit. Press Ctrl-C
+
+## v0.0.4
+### Changes
+ - Added Gui for Windows.
