@@ -12,12 +12,12 @@ jobs:
     strategy:
       matrix:
         include:
-#          - os: ubuntu-20.04
-#            python-version: '3.8'
+          #          - os: ubuntu-20.04
+          #            python-version: '3.8'
           - os: windows-latest
             python-version: '3.12'
-#          - os: macos-latest
-#            python-version: '3.12'
+    #          - os: macos-latest
+    #            python-version: '3.12'
 
     steps:
       - uses: actions/checkout@v2
@@ -44,7 +44,6 @@ jobs:
         run: |
           pip install -r ./src/requirements.txt
           pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
-            - name: Build with PyInstaller for Windows
 
       - name: Build with PyInstaller for Linux
         if: matrix.os == 'linux-latest'
@@ -83,29 +82,29 @@ jobs:
           Compress-Archive -Path ./${{ vars.PROGRAM_NAME }} -DestinationPath ${{ vars.PROGRAM_NAME }}-windows.zip
         working-directory: ${{github.workspace}}
 
-#      - name: Package macOS Artifact
-#        if: matrix.os == 'macos-latest'
-#        run: |
-#          mv dist/main dist/${{ vars.PROGRAM_NAME }}
-#          cp README.md dist/
-#          cp LICENSE dist/
-#          cp CHANGELOG.md dist/
-#          mv dist ${{ vars.PROGRAM_NAME }}
-#          zip -r ${{ vars.PROGRAM_NAME }}-macOS.zip ./${{ vars.PROGRAM_NAME }}
-#        working-directory: ${{github.workspace}}
+      #      - name: Package macOS Artifact
+      #        if: matrix.os == 'macos-latest'
+      #        run: |
+      #          mv dist/main dist/${{ vars.PROGRAM_NAME }}
+      #          cp README.md dist/
+      #          cp LICENSE dist/
+      #          cp CHANGELOG.md dist/
+      #          mv dist ${{ vars.PROGRAM_NAME }}
+      #          zip -r ${{ vars.PROGRAM_NAME }}-macOS.zip ./${{ vars.PROGRAM_NAME }}
+      #        working-directory: ${{github.workspace}}
 
-#      - name: Package Linux Artifact
-#        if: matrix.os == 'ubuntu-20.04'
-#        run: |
-#          ls -l dist
-#          mv dist/main dist/${{ vars.PROGRAM_NAME }}
-#          cp README.md dist/
-#          cp LICENSE dist/
-#          cp CHANGELOG.md dist/
-#          ls -l dist
-#          mv dist ${{ vars.PROGRAM_NAME }}
-#          tar -czvf ${{ vars.PROGRAM_NAME }}-Linux.tar.gz -C ./ ${{ vars.PROGRAM_NAME }}
-#        working-directory: ${{github.workspace}}
+      #      - name: Package Linux Artifact
+      #        if: matrix.os == 'ubuntu-20.04'
+      #        run: |
+      #          ls -l dist
+      #          mv dist/main dist/${{ vars.PROGRAM_NAME }}
+      #          cp README.md dist/
+      #          cp LICENSE dist/
+      #          cp CHANGELOG.md dist/
+      #          ls -l dist
+      #          mv dist ${{ vars.PROGRAM_NAME }}
+      #          tar -czvf ${{ vars.PROGRAM_NAME }}-Linux.tar.gz -C ./ ${{ vars.PROGRAM_NAME }}
+      #        working-directory: ${{github.workspace}}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
@@ -114,7 +113,7 @@ jobs:
           path: |
             ${{ vars.PROGRAM_NAME }}-windows.zip
             ${{ vars.PROGRAM_NAME }}-macOS.zip
-#            ${{ vars.PROGRAM_NAME }}-Linux.tar.gz
+  #            ${{ vars.PROGRAM_NAME }}-Linux.tar.gz
 
   release:
     if: "contains(github.event.head_commit.message, 'Release: ')"
