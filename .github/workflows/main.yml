@@ -33,34 +33,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
 
-#      - name: Build with PyInstaller for macOS
-#        if: matrix.os == 'macos-latest'
-#        run: |
-#          pip install -r ./src/requirements_mac.txt
-#          pyinstaller --onefile --windowed --icon ./src/images/MicroTally.png --add-data "./src/images:images" ./src/main.py
+      - name: Build with PyInstaller for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          pip install -r ./src/requirements_mac.txt
+          pyinstaller --onefile --windowed --icon ./src/images/MicroTally.png --add-data "./src/images:images" ./src/main.py
 
       - name: Build with PyInstaller for Windows
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == 'windows-latest'
         run: |
           pip install -r ./src/requirements.txt
           pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
             - name: Build with PyInstaller for Windows
 
       - name: Build with PyInstaller for Linux
-        if: matrix.os != 'linux-latest'
+        if: matrix.os == 'linux-latest'
         run: |
           pip install -r ./src/requirements.txt
           pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
 
-#      - name: Test Windows Executable
-#        if: matrix.os == 'windows-latest'
-#        run: |
-#          dir
-#          cd ..
-#          cd ..
-#          dir
-#          .\dist\main.exe -t
-#        timeout-minutes: 2  # Set an appropriate timeout
+      - name: Test Windows Executable
+        if: matrix.os == 'windows-latest'
+        run: |
+          dir
+          cd ..
+          cd ..
+          dir
+          .\dist\main.exe -t
+        timeout-minutes: 2  # Set an appropriate timeout
 
       - name: Test Linux Executable
         if: matrix.os == 'ubuntu-20.04'
