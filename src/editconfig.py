@@ -2,7 +2,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QGridLayout
 from configparser import ConfigParser
 from tally_server import CAMERA_CONFIG
-from src.utils import build_camera_config
+from utils import build_camera_config
 
 
 class ConfigEditor(QWidget):

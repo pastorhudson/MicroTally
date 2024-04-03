@@ -8,11 +8,22 @@ from PySide6.QtCore import QThreadPool, QRunnable
 import asyncio
 from tally_server import CAMERA_STATE, handle_tally, CAMERA_CONFIG, all_off
 from utils import setup_logger, check_config, resource_path
+import argparse
 
 if sys.platform.startswith('win'):
     from utils import get_wirecast_shots
 elif sys.platform.startswith('darwin'):
     from mac_wirecast import get_mac_wirecast_shots
+
+
+parser = argparse.ArgumentParser(description="MicroTally server")
+parser.add_argument('--test', '-t', action='store_true', help="Enable test mode")
+
+args = parser.parse_args(sys.argv[1:])
+
+if args.test:
+    print(f'Test mode enabled: {args.test}')
+    sys.exit()
 
 
 class AsyncWorker(QRunnable):
