@@ -16,8 +16,8 @@ jobs:
           #            python-version: '3.8'
           - os: windows-latest
             python-version: '3.12'
-    #          - os: macos-latest
-    #            python-version: '3.12'
+          - os: macos-latest
+            python-version: '3.12'
 
     steps:
       - uses: actions/checkout@v2
@@ -78,16 +78,16 @@ jobs:
           Compress-Archive -Path ./${{ vars.PROGRAM_NAME }} -DestinationPath ${{ vars.PROGRAM_NAME }}-windows.zip
         working-directory: ${{github.workspace}}
 
-      #      - name: Package macOS Artifact
-      #        if: matrix.os == 'macos-latest'
-      #        run: |
-      #          mv dist/main dist/${{ vars.PROGRAM_NAME }}
-      #          cp README.md dist/
-      #          cp LICENSE dist/
-      #          cp CHANGELOG.md dist/
-      #          mv dist ${{ vars.PROGRAM_NAME }}
-      #          zip -r ${{ vars.PROGRAM_NAME }}-macOS.zip ./${{ vars.PROGRAM_NAME }}
-      #        working-directory: ${{github.workspace}}
+      - name: Package macOS Artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          mv dist/main dist/${{ vars.PROGRAM_NAME }}
+          cp README.md dist/
+          cp LICENSE dist/
+          cp CHANGELOG.md dist/
+          mv dist ${{ vars.PROGRAM_NAME }}
+          zip -r ${{ vars.PROGRAM_NAME }}-macOS.zip ./${{ vars.PROGRAM_NAME }}
+        working-directory: ${{github.workspace}}
 
       #      - name: Package Linux Artifact
       #        if: matrix.os == 'ubuntu-20.04'
