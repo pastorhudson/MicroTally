@@ -37,7 +37,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           pip install -r ./src/requirements_mac.txt
-          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data ".\src\images;images" ./src/main.py
+          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data ".\src\images:images" ./src/main.py
 
       - name: Build with PyInstaller for Windows and Linux
         if: matrix.os != 'macos-latest'
