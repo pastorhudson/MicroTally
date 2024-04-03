@@ -44,23 +44,23 @@ jobs:
         run: |
           pip install -r ./src/requirements.txt
           pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
-            - name: Build with PyInstaller for Windows and Linux
+            - name: Build with PyInstaller for Windows
 
-      - name: Build with PyInstaller for Windows and Linux
-        if: matrix.os != 'linux-latest'
-        run: |
-          pip install -r ./src/requirements.txt
-          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
+#      - name: Build with PyInstaller for Linux
+#        if: matrix.os != 'linux-latest'
+#        run: |
+#          pip install -r ./src/requirements.txt
+#          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
 
       - name: Test Windows Executable
         if: matrix.os == 'windows-latest'
         run: dist\main.exe -t
         timeout-minutes: 2  # Set an appropriate timeout
 
-      - name: Test Linux Executable
-        if: matrix.os == 'ubuntu-20.04'
-        run: dist/main -t
-        timeout-minutes: 2  # Set an appropriate timeout
+#      - name: Test Linux Executable
+#        if: matrix.os == 'ubuntu-20.04'
+#        run: dist/main -t
+#        timeout-minutes: 2  # Set an appropriate timeout
 
       - name: Test Mac Executable
         if: matrix.os == 'macos-latest'
@@ -89,18 +89,18 @@ jobs:
           zip -r ${{ vars.PROGRAM_NAME }}-macOS.zip ./${{ vars.PROGRAM_NAME }}
         working-directory: ${{github.workspace}}
 
-      - name: Package Linux Artifact
-        if: matrix.os == 'ubuntu-20.04'
-        run: |
-          ls -l dist
-          mv dist/main dist/${{ vars.PROGRAM_NAME }}
-          cp README.md dist/
-          cp LICENSE dist/
-          cp CHANGELOG.md dist/
-          ls -l dist
-          mv dist ${{ vars.PROGRAM_NAME }}
-          tar -czvf ${{ vars.PROGRAM_NAME }}-Linux.tar.gz -C ./ ${{ vars.PROGRAM_NAME }}
-        working-directory: ${{github.workspace}}
+#      - name: Package Linux Artifact
+#        if: matrix.os == 'ubuntu-20.04'
+#        run: |
+#          ls -l dist
+#          mv dist/main dist/${{ vars.PROGRAM_NAME }}
+#          cp README.md dist/
+#          cp LICENSE dist/
+#          cp CHANGELOG.md dist/
+#          ls -l dist
+#          mv dist ${{ vars.PROGRAM_NAME }}
+#          tar -czvf ${{ vars.PROGRAM_NAME }}-Linux.tar.gz -C ./ ${{ vars.PROGRAM_NAME }}
+#        working-directory: ${{github.workspace}}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
@@ -109,7 +109,7 @@ jobs:
           path: |
             ${{ vars.PROGRAM_NAME }}-windows.zip
             ${{ vars.PROGRAM_NAME }}-macOS.zip
-            ${{ vars.PROGRAM_NAME }}-Linux.tar.gz
+#            ${{ vars.PROGRAM_NAME }}-Linux.tar.gz
 
   release:
     if: "contains(github.event.head_commit.message, 'Release: ')"
@@ -155,15 +155,15 @@ jobs:
           asset_name: ${{ vars.PROGRAM_NAME }}-Windows.zip
           asset_content_type: application/zip
 
-#      - name: Upload macOS Artifact to Release
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./artifacts/artifact-macos-latest/${{ vars.PROGRAM_NAME }}-macOS.zip
-#          asset_name: ${{ vars.PROGRAM_NAME }}-macOS.zip
-#          asset_content_type: application/zip
+      - name: Upload macOS Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/artifact-macos-latest/${{ vars.PROGRAM_NAME }}-macOS.zip
+          asset_name: ${{ vars.PROGRAM_NAME }}-macOS.zip
+          asset_content_type: application/zip
 #
 #      - name: Upload Linux Artifact to Release
 #        uses: actions/upload-release-asset@v1
