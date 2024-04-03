@@ -3,7 +3,7 @@ from configparser import ConfigParser
 from editconfig import ConfigEditor
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QSpacerItem, \
-    QSizePolicy
+    QSizePolicy, QMessageBox
 from PySide6.QtCore import QThreadPool, QRunnable
 import asyncio
 from tally_server import CAMERA_STATE, handle_tally, CAMERA_CONFIG, all_off
@@ -125,7 +125,6 @@ class MainWindow(QMainWindow):
     def open_config_editor(self):
         self.editor = ConfigEditor()
         self.editor.show()
-
 
     def start_async_task(self):
         self.start_button.setEnabled(False)

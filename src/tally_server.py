@@ -1,7 +1,13 @@
+import signal
+
 import aiohttp
 import asyncio
+
+from PySide6.QtCore import QObject, Signal
+
 from utils import build_camera_config, build_camera_state, get_wirecast_shots, setup_logger, should_continue
 import logging
+from aiohttp import ClientConnectorError, ClientTimeout
 
 # should_continue = True
 
@@ -10,18 +16,33 @@ CAMERA_CONFIG = build_camera_config()
 # This is a simplified state management approach
 CAMERA_STATE = build_camera_state()
 
-
 async def fetch(url):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            html = await response.text()
+    timeout = ClientTimeout(total=2)
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(url) as response:
+                try:
+                    html = await response.text()
+                except ClientConnectorError:
+                    print('No Connection')
+    except ClientConnectorError as e:
+        # Emit signal with error message for ClientConnectorError
+        print(f"Request to {url} timed out. Exception: {e}")
+        # signal.error_occurred.emit(f"Failed to connect to {url}. Exception: {e}")
+    except asyncio.TimeoutError as e:
+        # Emit signal with timeout error message
+        print(f"Request to {url} timed out. Exception: {e}")
+        # signal.error_occurred.emit(f"Request to {url} timed out. Exception: {e}")
 
 
 async def change_cam(camera_name, cam_status):
     cam_ip = CAMERA_CONFIG.get(camera_name)
     if cam_ip:
         url = f"http://{cam_ip}/?led={cam_status}"
-        await fetch(url)
+        try:
+            await fetch(url)
+        except ClientConnectorError:
+            print(f'Could not connect to {cam_ip}')
     else:
         print(f"Camera {camera_name} not found in configuration.")
 

@@ -1,6 +1,8 @@
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QGridLayout
 from configparser import ConfigParser
+from tally_server import CAMERA_CONFIG
+from src.utils import build_camera_config
 
 
 class ConfigEditor(QWidget):
@@ -63,6 +65,8 @@ class ConfigEditor(QWidget):
         self.add_option_row()
 
     def save_config(self):
+        global CAMERA_CONFIG
+        print(CAMERA_CONFIG)
         self.config.clear()
         section = 'microtallys'  # Explicitly specify the section
         self.config.add_section(section)
@@ -82,6 +86,9 @@ class ConfigEditor(QWidget):
 
         with open('config.ini', 'w') as configfile:
             self.config.write(configfile)
+        CAMERA_CONFIG = build_camera_config()
+        print(CAMERA_CONFIG)
+        self.close()
 
 
 if __name__ == '__main__':
