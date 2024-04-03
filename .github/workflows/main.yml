@@ -56,6 +56,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           dir
+          cd src\dist
           .\dist\main.exe -t
         timeout-minutes: 2  # Set an appropriate timeout
 
