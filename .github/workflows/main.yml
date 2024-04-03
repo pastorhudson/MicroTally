@@ -16,8 +16,8 @@ jobs:
 #            python-version: '3.8'
           - os: windows-latest
             python-version: '3.12'
-          - os: macos-latest
-            python-version: '3.12'
+#          - os: macos-latest
+#            python-version: '3.12'
 
     steps:
       - uses: actions/checkout@v2
@@ -46,11 +46,11 @@ jobs:
           pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
             - name: Build with PyInstaller for Windows
 
-#      - name: Build with PyInstaller for Linux
-#        if: matrix.os != 'linux-latest'
-#        run: |
-#          pip install -r ./src/requirements.txt
-#          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
+      - name: Build with PyInstaller for Linux
+        if: matrix.os != 'linux-latest'
+        run: |
+          pip install -r ./src/requirements.txt
+          pyinstaller --onefile --windowed --icon .\src\images\MicroTally.ico --add-data "src\images;images" .\src\main.py
 
 #      - name: Test Windows Executable
 #        if: matrix.os == 'windows-latest'
@@ -62,15 +62,15 @@ jobs:
 #          .\dist\main.exe -t
 #        timeout-minutes: 2  # Set an appropriate timeout
 
-#      - name: Test Linux Executable
-#        if: matrix.os == 'ubuntu-20.04'
-#        run: dist/main -t
-#        timeout-minutes: 2  # Set an appropriate timeout
+      - name: Test Linux Executable
+        if: matrix.os == 'ubuntu-20.04'
+        run: dist/main -t
+        timeout-minutes: 2  # Set an appropriate timeout
 
-#      - name: Test Mac Executable
-#        if: matrix.os == 'macos-latest'
-#        run: dist/main -t
-#        timeout-minutes: 2  # Set an appropriate timeout
+      - name: Test Mac Executable
+        if: matrix.os == 'macos-latest'
+        run: dist/main -t
+        timeout-minutes: 2  # Set an appropriate timeout
 
       - name: Package Windows Artifact
         if: matrix.os == 'windows-latest'
