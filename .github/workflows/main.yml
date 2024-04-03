@@ -57,6 +57,7 @@ jobs:
         run: |
           dir
           cd ..
+          cd ..
           dir
           .\dist\main.exe -t
         timeout-minutes: 2  # Set an appropriate timeout
